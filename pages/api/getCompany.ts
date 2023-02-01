@@ -27,6 +27,7 @@ export default async function handler(
     console.log('found summary in db');
     // just return the first result for now, this can get tricky otherwise– i need to handle url variations
     res.status(200).json({ body: summary[0].summary });
+    return;
   }
 
   // init puppeteer
@@ -66,5 +67,6 @@ export default async function handler(
     },
   });
 
+  console.log('no summary found in db. called gpt-3 and memoized it');
   res.status(200).json({ body: completion.data.choices[0].text });
 }
