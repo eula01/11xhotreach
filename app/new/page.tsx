@@ -28,34 +28,43 @@ export default function Page() {
     e.preventDefault();
     console.log('form submitted with these inputs', inputs);
 
-    const linkedinData = await fetch('/api/getLinkedin', {
+    // get linkedin profile data
+    const linkedinReponse = await fetch('/api/getLinkedin', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(inputs.linkedin),
     });
+    let linkedinReponseJson = await linkedinReponse.json();
+    setLinkedinData(linkedinReponseJson);
 
-    const linkedin = await linkedinData.json();
-    setLinkedinData(linkedin);
-
-    const companyData = await fetch('/api/getCompany', {
+    // get company summary data
+    const companyReponse = await fetch('/api/getCompany', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(inputs.company),
     });
+    let companyReponseJson = await companyReponse.json();
+    setCompanyData(companyReponseJson.body);
 
-    const company = await companyData.json();
-    setCompanyData(company.body);
-
-    const data = {
-      linkedin,
-      company,
-    };
-
-    console.log('data', data);
+    // get email body
+    const preview = await fetch('/api/createEmail', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: linkedinData.name,
+        title: linkedinData.title,
+        job: linkedinData.job,
+        company: companyData,
+      }),
+    });
+    let previewResponse = await preview.json();
+    setPreview(previewResponse.body.trim());
   };
 
   return (
@@ -133,7 +142,7 @@ export default function Page() {
         </form>
         <div className="mt-8">
           <label
-            htmlFor="comment"
+            htmlFor="preview"
             className="block text-sm font-medium text-gray-700"
           >
             Preview of email
@@ -141,9 +150,9 @@ export default function Page() {
           <div className="mt-1">
             <textarea
               rows={4}
-              name="comment"
-              id="comment"
-              value={JSON.stringify(preview, null, 2)}
+              name="preview"
+              id="preview"
+              value={preview}
               className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
               defaultValue={''}
             />
@@ -154,6 +163,8 @@ export default function Page() {
         linkedinData: {JSON.stringify(linkedinData)}
         <br />
         companyData: {companyData}
+        <br />
+        preview: {preview}
       </div>
     </main>
   );
