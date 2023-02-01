@@ -2,7 +2,6 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import puppeteer from 'puppeteer';
 import { Configuration, OpenAIApi } from 'openai';
 import { PrismaClient } from '@prisma/client';
-import { url } from 'inspector';
 
 // define api clients outside of handler to avoid creating new clients for each request
 const prisma = new PrismaClient();
