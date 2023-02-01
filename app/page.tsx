@@ -6,7 +6,7 @@ export default function Home() {
       <div className="bg-white">
         <div className="max-w-7xl mx-auto text-center py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
           <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-            <span className="block">11x outreach tool</span>
+            <span className="block">11x hotreach</span>
           </h2>
           <div className="mt-8 flex justify-center">
             <div className="inline-flex rounded-md shadow">
@@ -25,7 +25,6 @@ export default function Home() {
                 See history
               </a>
             </div>
-            
           </div>
         </div>
       </div>

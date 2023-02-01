@@ -1,15 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Cheerio } from 'cheerio';
-
-import { ArrowSmRightIcon } from '@heroicons/react/outline';
+import { ArrowSmRightIcon, ExternalLinkIcon } from '@heroicons/react/outline';
 
 export default function Page() {
   const [inputs, setInputs] = useState({
     company: '',
     linkedin: '',
     email: '',
+    preview: '',
   });
   const [linkedinData, setLinkedinData] = useState({
     name: '',
@@ -18,7 +17,6 @@ export default function Page() {
     job: '',
   });
   const [companyData, setCompanyData] = useState('');
-  let [preview, setPreview] = useState('');
 
   const handleChange = (e: any) => {
     setInputs({ ...inputs, [e.target.name]: e.target.value });
@@ -64,7 +62,7 @@ export default function Page() {
       }),
     });
     let previewResponse = await preview.json();
-    setPreview(previewResponse.body.trim());
+    setInputs({ ...inputs, preview: previewResponse.body.trim() });
   };
 
   return (
@@ -145,27 +143,47 @@ export default function Page() {
             htmlFor="preview"
             className="block text-sm font-medium text-gray-700"
           >
-            Preview of email
+            Email preview
           </label>
           <div className="mt-1">
             <textarea
               rows={4}
               name="preview"
               id="preview"
-              value={preview}
+              value={inputs.preview}
+              onChange={handleChange}
               className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-              defaultValue={''}
             />
           </div>
+          <a
+            href={`https://mail.google.com/mail/u/0/#inbox?compose=new`}
+            rel="noreferrer"
+            target="_blank"
+          >
+            <button
+              type="button"
+              className="inline-flex items-center px-4 py-2 mt-5 border border-transparent text-sm rounded-md bg-indigo-300 hover:bg-indigo-400"
+            >
+              Open Gmail
+              <ExternalLinkIcon className="h-5 w-5 text-gray-800 ml-1" />
+            </button>
+          </a>
         </div>
       </div>
-      <div>
+      {/* <div>
+        <br />
+        <br />
+        inputs: {JSON.stringify(inputs)}
+        <br />
+        <br />
         linkedinData: {JSON.stringify(linkedinData)}
+        <br />
         <br />
         companyData: {companyData}
         <br />
-        preview: {preview}
-      </div>
+        <br />
+        preview: {inputs.preview}
+      </div> */}
     </main>
   );
 }
