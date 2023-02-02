@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import puppeteer from 'puppeteer';
 import chromium from 'chrome-aws-lambda';
 import playwright from 'playwright';
 
