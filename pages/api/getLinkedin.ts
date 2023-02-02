@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import puppeteer from 'puppeteer';
 import chromium from 'chrome-aws-lambda';
+import playwright from 'playwright';
 
 type ResData = {
   [key: string]: string;
@@ -11,11 +12,14 @@ export default async function handler(
   res: NextApiResponse<ResData>
 ) {
   // init puppeteer
-  console.log("WWWWWWW node env: ", process.env.NODE_ENV);
-  console.log("WWWWWWW chromium: ", chromium);
-  console.log("WWWWWWW chromium.executablePath: ", await chromium.executablePath);
-  
-  const browser = await chromium.puppeteer.launch({
+  console.log('WWWWWWW node env: ', process.env.NODE_ENV);
+  console.log('WWWWWWW chromium: ', chromium);
+  console.log(
+    'WWWWWWW chromium.executablePath: ',
+    await chromium.executablePath
+  );
+
+  const browser = await playwright.chromium.launch({
     args: chromium.args,
     executablePath:
       process.env.NODE_ENV !== 'development'
@@ -24,37 +28,61 @@ export default async function handler(
     headless: process.env.NODE_ENV !== 'development' ? chromium.headless : true,
   });
 
-  const page = await browser.newPage();
-  await page.setViewport({ width: 1080, height: 1024 });
+  let page = await browser.newPage({
+    viewport: {
+      width: 1080,
+      height: 1024,
+    },
+  });
+  await page.goto(req.body);
 
   console.log(req.body);
 
   // no need to handle `req.body.url === undefined`, input validation is client-side
-  await page.goto(req.body);
 
   // close popup
   const searchResultSelector =
-    '.contextual-sign-in-modal__modal-dismiss-icon > .artdeco-icon';
-  await page.waitForSelector(searchResultSelector);
-  await page.click(searchResultSelector);
+    '#public_profile_contextual-sign-in > div > section > button';
+
+  let success = false;
+  while (!success) {
+    try {
+      let popup = await page
+        .locator(searchResultSelector)
+        .click({ timeout: 3000 });
+      success = true;
+    } catch (e) {
+      console.log('got hit with authwall, trying again');
+      page.close();
+      page = await browser.newPage({
+        viewport: {
+          width: 1080,
+          height: 1024,
+        },
+      });
+      await page.goto(req.body);
+    }
+  }
 
   // name
   const nameSelector = '.top-card-layout__title';
-  const textSelector = await page.waitForSelector(nameSelector);
+  const textSelector = await page.locator(nameSelector);
   let name = textSelector
-    ? await textSelector.evaluate((el) => el.textContent?.trim())
+    ? await textSelector.evaluate((el) => el.textContent?.trim(), {
+        timeout: 8000,
+      })
     : '';
 
   // title
   const titleSelector = '.top-card-layout__headline';
-  const titleTextSelector = await page.waitForSelector(titleSelector);
+  const titleTextSelector = await page.locator(titleSelector);
   let title = titleTextSelector
     ? await titleTextSelector.evaluate((el) => el.textContent?.trim())
     : '';
 
   // education
   const edcuationSelector = '.education__list-item';
-  const edcuationTextSelector = await page.waitForSelector(edcuationSelector);
+  const edcuationTextSelector = await page.locator(edcuationSelector);
   let education = edcuationTextSelector
     ? await edcuationTextSelector.evaluate((el) => el.textContent?.trim())
     : '';
@@ -62,7 +90,7 @@ export default async function handler(
   // job
   const jobSelector =
     'section:nth-of-type(1) > section:nth-of-type(3) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(1)';
-  const jobTextSelector = await page.waitForSelector(jobSelector);
+  const jobTextSelector = await page.locator(jobSelector);
   let job = jobTextSelector
     ? await jobTextSelector.evaluate((el) => el.textContent?.trim())
     : '';
