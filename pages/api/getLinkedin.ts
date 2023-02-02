@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import puppeteer from 'puppeteer';
+import chromium from 'chrome-aws-lambda';
 
 type ResData = {
   [key: string]: string;
@@ -10,7 +11,19 @@ export default async function handler(
   res: NextApiResponse<ResData>
 ) {
   // init puppeteer
-  const browser = await puppeteer.launch();
+  console.log("WWWWWWW node env: ", process.env.NODE_ENV);
+  console.log("WWWWWWW chromium: ", chromium);
+  console.log("WWWWWWW chromium.executablePath: ", await chromium.executablePath);
+  
+  const browser = await chromium.puppeteer.launch({
+    args: chromium.args,
+    executablePath:
+      process.env.NODE_ENV !== 'development'
+        ? await chromium.executablePath
+        : '/usr/bin/chromium',
+    headless: process.env.NODE_ENV !== 'development' ? chromium.headless : true,
+  });
+
   const page = await browser.newPage();
   await page.setViewport({ width: 1080, height: 1024 });
 
@@ -53,7 +66,6 @@ export default async function handler(
   let job = jobTextSelector
     ? await jobTextSelector.evaluate((el) => el.textContent?.trim())
     : '';
-
 
   // TOOD: fix this hacky solution by making the response data more flexible and instead of returning one education or one job, return an array of them, and make the selectors more specific. For now this will be fine though.
   name = name || '';
