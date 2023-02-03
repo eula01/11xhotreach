@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import puppeteer from 'puppeteer';
 import { Configuration, OpenAIApi } from 'openai';
 import { PrismaClient } from '@prisma/client';
 
@@ -15,30 +14,31 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  let { name, title, job, company } = req.body;
+  let { name, title, companyName, job, company, email } = req.body;
   let prompt = `
-  Write a personalized cold email to ${name}, who is a ${title} at ${job}, and explain the benefits of using a fully automated sales development representative worker, and how it can deliver value to their company. Benefits include 24/7 availability, low cost, and relevant personalization. Keep it short, and include a call to action at the end.
+  Write a personalized cold email to ${name} who is a ${title} at ${companyName}. ${companyName} is a company that ${company}.
+  
+  In the casual cold email, sell them our automated sales development representative (SDR) product. It can help drive sales by being available 24/7 and being low cost. Keep it short and casual. Include a call to action at the end.`;
 
-  Here is more inforamtion about ${name}'s company:
+  try {
+    const completion = await openai.createCompletion({
+      model: 'text-davinci-003',
+      prompt,
+      max_tokens: 1000,
+    });
+    console.log(completion.data.choices[0].text);
 
-  ${company}`;
-
-  const completion = await openai.createCompletion({
-    model: 'text-davinci-003',
-    prompt,
-    max_tokens: 1000,
-  });
-
-  console.log(completion.data.choices[0].text);
-
-  await prisma.outreach.create({
-    data: {
-      name,
-      email: req.body.email || null,
-      body: completion.data.choices[0].text,
-      got_reply: false,
-    },
-  });
-
-  res.status(200).json({ body: completion.data.choices[0].text });
+    await prisma.outreach.create({
+      data: {
+        name,
+        email,
+        body: completion.data.choices[0].text,
+        got_reply: false,
+        companyname: companyName,
+      },
+    });
+    res.status(200).json({ body: completion.data.choices[0].text });
+  } catch (e) {
+    res.status(500).json(e);
+  }
 }

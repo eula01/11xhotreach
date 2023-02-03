@@ -14,10 +14,11 @@ model companysummaries {
 }
 
 model outreach {
-  id         Int       @id @default(autoincrement())
-  name       String?
-  email      String?
-  body       String?
-  got_reply  Boolean?
-  date_added DateTime? @db.Date
+  id          Int       @id @default(autoincrement())
+  name        String?
+  email       String?
+  body        String?
+  got_reply   Boolean?
+  date_added  DateTime? @db.Date
+  companyname String?
 }
