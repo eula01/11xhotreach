@@ -1,14 +1,8 @@
 'use client';
 
 import { XIcon } from '@heroicons/react/outline';
-import { Fragment, useState } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
-import {
-  CheckIcon,
-  ExternalLinkIcon,
-  DuplicateIcon,
-  ClockIcon,
-} from '@heroicons/react/outline';
+import { useState } from 'react';
+import { Dialog } from '@headlessui/react';
 
 import useSWR from 'swr';
 

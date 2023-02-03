@@ -1,7 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ArrowSmRightIcon, ExternalLinkIcon } from '@heroicons/react/outline';
+import { useState } from 'react';
+import {
+  ExternalLinkIcon,
+  DuplicateIcon,
+  CheckIcon,
+  ClockIcon,
+} from '@heroicons/react/outline';
 
 export default function Page() {
   const [inputs, setInputs] = useState({
@@ -13,10 +18,12 @@ export default function Page() {
   const [linkedinData, setLinkedinData] = useState({
     name: '',
     title: '',
+    companyName: '',
     education: '',
     job: '',
   });
   const [companyData, setCompanyData] = useState('');
+  const [showCopyClicked, setShowCopyClicked] = useState(false);
 
   const handleChange = (e: any) => {
     setInputs({ ...inputs, [e.target.name]: e.target.value });
@@ -35,7 +42,13 @@ export default function Page() {
       body: JSON.stringify(inputs.linkedin),
     });
     let linkedinReponseJson = await linkedinReponse.json();
+    console.log('linkedinReponseJson', linkedinReponseJson);
     setLinkedinData(linkedinReponseJson);
+
+    let body = {
+      companySite: inputs.company,
+      companyName: linkedinReponseJson.companyName,
+    };
 
     // get company summary data
     const companyReponse = await fetch('/api/getCompany', {
@@ -43,9 +56,10 @@ export default function Page() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(inputs.company),
+      body: JSON.stringify(body),
     });
     let companyReponseJson = await companyReponse.json();
+    console.log('companyReponseJson', companyReponseJson);
     setCompanyData(companyReponseJson.body);
 
     // get email body
@@ -57,12 +71,22 @@ export default function Page() {
       body: JSON.stringify({
         name: linkedinData.name,
         title: linkedinData.title,
+        companyName: linkedinData.companyName,
         job: linkedinData.job,
         company: companyData,
+        email: inputs.email,
       }),
     });
     let previewResponse = await preview.json();
     setInputs({ ...inputs, preview: previewResponse.body.trim() });
+  };
+
+  let handleCopy = () => {
+    navigator.clipboard.writeText(inputs.preview);
+    setShowCopyClicked(true);
+    setTimeout(() => {
+      setShowCopyClicked(false);
+    }, 3000);
   };
 
   return (
@@ -100,7 +124,7 @@ export default function Page() {
               <div className="mt-1">
                 <input
                   type="text"
-                  required
+                  // required
                   name="linkedin"
                   id="linkedin"
                   value={inputs.linkedin}
@@ -133,8 +157,8 @@ export default function Page() {
               type="submit"
               className="inline-flex items-center px-4 py-2 mt-5 border border-transparent text-sm rounded-md bg-indigo-300 hover:bg-indigo-400"
             >
-              Next
-              <ArrowSmRightIcon className="h-5 w-5 text-gray-800 ml-1" />
+              Generate email
+              <ClockIcon className="h-5 w-5 text-gray-800 ml-1" />
             </button>
           </div>
         </form>
@@ -168,6 +192,23 @@ export default function Page() {
               <ExternalLinkIcon className="h-5 w-5 text-gray-800 ml-1" />
             </button>
           </a>
+          <button
+            type="button"
+            onClick={() => handleCopy()}
+            className="inline-flex items-center px-3 py-2 mt-5 ml-3 border border-transparent text-sm rounded-md bg-indigo-300 hover:bg-indigo-400"
+          >
+            {showCopyClicked ? (
+              <span className="inline-flex">
+                Copied!
+                <CheckIcon className="h-5 w-5 text-gray-800 ml-1" />
+              </span>
+            ) : (
+              <span className="inline-flex">
+                Copy text
+                <DuplicateIcon className="h-5 w-5 text-gray-800 ml-1" />
+              </span>
+            )}
+          </button>
         </div>
       </div>
       {/* <div>
