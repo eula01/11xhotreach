@@ -18,7 +18,8 @@ export default async function handler(
   let prompt = `
   Write a personalized cold email to ${name} who is a ${title} at ${companyName}. ${companyName} is a company that ${company}.
   
-  In the casual cold email, sell them our automated sales development representative (SDR) product. It can help drive sales by being available 24/7 and being low cost. Keep it short and casual. Include a call to action at the end.`;
+  In the cold email, sell them our automated sales development representative (SDR) product. It will help drive sales by being low cost and available 24/7. Keep it short and casual. Include a call to action at the end. Make sure to include personalization in the email based on the company.
+  `;
 
   try {
     const completion = await openai.createCompletion({
