@@ -1,0 +1,16 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
+
+// get all rows from https://railway.app/project/c96de165-15f8-444d-a7ad-2fff75050ea2/plugin/1815bda1-279c-4d9d-ad77-d027324d0fd8/data?state=table&table=outreach
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  try {
+    const outreach = await prisma.outreach.findMany();
+    res.status(200).json(outreach);
+  } catch (e) {
+    res.status(500).json(e);
+  }
+}
