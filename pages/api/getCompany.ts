@@ -33,18 +33,19 @@ export default async function handler(
   }
 
   // check if we can scrape crunchbase for a summary to avoid gpt-3 call
-  const crunchbaseSummary = await getCrunchbaseDesc(companyName);
-  if (crunchbaseSummary) {
-    await prisma.companysummaries.create({
-      data: {
-        site: companySite,
-        summary: crunchbaseSummary,
-      },
-    });
-    console.log('found summary in db');
-    res.status(200).json({ body: crunchbaseSummary });
-    return;
-  }
+  // @DEPRECATED - cruchbase rejects like 99% of scraping attempts so the +10 seconds are not worth it
+  // const crunchbaseSummary = await getCrunchbaseDesc(companyName);
+  // if (crunchbaseSummary) {
+  //   await prisma.companysummaries.create({
+  //     data: {
+  //       site: companySite,
+  //       summary: crunchbaseSummary,
+  //     },
+  //   });
+  //   console.log('found summary in db');
+  //   res.status(200).json({ body: crunchbaseSummary });
+  //   return;
+  // }
 
   // fine... lets call gpt-3
   try {
